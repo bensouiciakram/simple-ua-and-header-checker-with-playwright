@@ -2,6 +2,21 @@ from playwright.sync_api import sync_playwright
 from playwright.sync_api._generated import Response
 from pprint import pprint 
 import logging 
+from pathlib import Path 
+import sys 
+
+# helper functions for initialisations : 
+def create_logger(logging_level:int) -> logging.RootLogger:
+    Path(__file__).parent.joinpath('logs').mkdir(exist_ok=True)
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging_level)
+    stream_handler = logging.StreamHandler(sys.stdout)
+    formatter = logging.Formatter('%(levelname)s:%(message)s')
+    file_handler = logging.FileHandler('logs/logs.log')
+    file_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
+    logger.addHandler(file_handler)
+    return logger 
 
 # global vars & initialisations : 
 browsers = [
@@ -9,9 +24,8 @@ browsers = [
     'firefox',
     'webkit'
 ]
-logging.basicConfig(
-    level=logging.DEBUG,
-)
+
+logger = create_logger(logging.DEBUG)
 
 # helper functions : 
 def choose_browser_type() -> int :
@@ -19,13 +33,11 @@ def choose_browser_type() -> int :
         print(f'{browser_type} : {index}')
     return int(input('Choose you browser id : '))
 
+
 def information_formatter(response:Response):
-    logging.info(f'the user agent is : {response.request.headers["user-agent"]}\n')
-    logging.info('the request headers is : \n')
-    pprint(response.request.headers)
-    print()
-    logging.info('the response headers is :\n')
-    pprint(response.headers)
+    logger.info(f'\nthe user agent is : {response.request.headers["user-agent"]}\n')
+    logger.info(f'the request headers is : \n{str(response.request.headers)}' + '\n')
+    logger.info(f'the response headers is :\n{str(response.headers)}')
 
 # main funtionality : 
 if __name__ == '__main__':
